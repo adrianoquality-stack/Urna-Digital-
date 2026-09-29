@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Colinha Digital Eleições 2026 MS — Vanildo Neves 70123</title>
+  <meta name="description" content="Simulador oficial da Urna Eletrônica Eleições 2026 Mato Grosso do Sul. Treine seu voto para Deputado Estadual Vanildo Neves 70123 e emita sua colinha." />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- Google Fonts: Inter and Roboto Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ms: {
+              navy: '#1B2A4A',      // Azul Institucional MS
+              dark: '#111D35',
+              green: '#3A7D44',     // Verde Pantanal (Confirma)
+              greenHover: '#2E6637',
+              gold: '#C9A227',      // Amarelo Ouro (Corrige / 70.123)
+              goldHover: '#B5901F',
+              urna: '#E5E7EB',      // Cinza Urna
+              urnaborder: '#9CA3AF',
+              lcd: '#F3F4F6',
+              lcdDark: '#1F2937',
+              screen: '#F8FAF9',
+              keypad: '#1E293B',
+              keypadHover: '#334155'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['"Roboto Mono"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Estilos realistas da Urna e do Comprovante Térmico */
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    .cursor-blink {
+      animation: blink 1s infinite;
+    }
+
+    /* Serrilha do cupom térmico */
+    .receipt-edge-top {
+      background: radial-gradient(circle, transparent, transparent 4px, #ffffff 4px, #ffffff);
+      background-size: 14px 14px;
+      background-position: -7px -7px;
+    }
+    .receipt-sawtooth {
+      position: relative;
+    }
+    .receipt-sawtooth::before, .receipt-sawtooth::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background-size: 16px 10px;
+      background-repeat: repeat-x;
+    }
+    .receipt-sawtooth::before {
+      top: -10px;
+      background-image: linear-gradient(135deg, transparent 45%, #ffffff 50%, #ffffff 100%),
+                        linear-gradient(-135deg, transparent 45%, #ffffff 50%, #ffffff 100%);
+    }
+    .receipt-sawtooth::after {
+      bottom: -10px;
+      background-image: linear-gradient(45deg, transparent 45%, #ffffff 50%, #ffffff 100%),
+                        linear-gradient(-45deg, transparent 45%, #ffffff 50%, #ffffff 100%);
+    }
+
+    /* Teclas 3D da urna eletrônica */
+    .urna-key {
+      box-shadow: 0 4px 0 #0f172a, 0 6px 6px rgba(0,0,0,0.25);
+      transition: all 0.06s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .urna-key:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #0f172a, 0 2px 3px rgba(0,0,0,0.2);
+    }
+
+    .key-branco {
+      box-shadow: 0 4px 0 #9ca3af, 0 6px 6px rgba(0,0,0,0.15);
+    }
+    .key-branco:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #9ca3af;
+    }
+
+    .key-corrige {
+      box-shadow: 0 4px 0 #8c6e14, 0 6px 6px rgba(0,0,0,0.2);
+    }
+    .key-corrige:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #8c6e14;
+    }
+
+    .key-confirma {
+      box-shadow: 0 6px 0 #1e4624, 0 8px 10px rgba(0,0,0,0.25);
+    }
+    .key-confirma:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #1e4624;
+    }
+
+    /* Otimização de Impressão */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printReceiptArea, #printReceiptArea * {
+        visibility: visible;
+      }
+      #printReceiptArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto;
+        box-shadow: none !important;
+        border: 1px dashed #1B2A4A !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans selection:bg-ms-gold selection:text-ms-navy">
+
+  <!-- CABEÇALHO INSTITUCIONAL MS -->
+  <header class="bg-ms-navy text-white shadow-md border-b-4 border-ms-gold no-print">
+    <div class="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3 text-center sm:text-left">
+        <!-- Brasão / Ícone MS -->
+        <div class="w-11 h-11 rounded-lg bg-white/10 flex items-center justify-center border border-white/20 text-ms-gold text-2xl font-black">
+          <i class="fa-solid fa-check-to-slot"></i>
+        </div>
+        <div>
+          <div class="flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold text-ms-gold tracking-widest uppercase">
+            <span>Mato Grosso do Sul</span>
+            <span>•</span>
+            <span>Eleições Gerais 2026</span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white leading-tight">
+            Colinha Digital & Simulador de Votação
+          </h1>
+        </div>
+      </div>
+
+      <!-- Destaque Vanildo Neves -->
+      <div class="flex items-center gap-3 bg-white/10 border border-white/20 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-slate-200">Dep. Estadual:</span>
+        <strong class="text-ms-gold font-bold tracking-wider text-base">VANILDO NEVES 70123</strong>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-3 sm:px-4 py-4 sm:py-6 flex flex-col items-center">
+
+    <!-- BARRA DE PROGRESSO DOS CARGOS -->
+    <section class="w-full mb-4 sm:mb-6 no-print" aria-label="Progresso da Votação">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-3 sm:p-4">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-xs sm:text-sm font-bold text-ms-navy flex items-center gap-2">
+            <i class="fa-solid fa-list-ol text-ms-gold"></i>
+            <span>Etapas de Votação (6 Cargos Oficiais)</span>
+          </div>
+          <div id="stepCounter" class="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">
+            Etapa 1 de 6
+          </div>
+        </div>
+
+        <div class="grid grid-cols-6 gap-1.5 sm:gap-2">
+          <!-- Step 1 -->
+          <div id="step-badge-0" class="step-pill flex flex-col items-center p-1.5 rounded-lg border text-center transition-all bg-ms-navy text-white border-ms-navy font-bold shadow-xs">
+            <span class="text-[10px] sm:text-xs uppercase leading-tight font-extrabold">1º</span>
+            <span class="text-[9px] sm:text-[11px] truncate w-full font-medium">Dep. Fed.</span>
+          </div>
+          <!-- Step 2 -->
+          <div id="step-badge-1" class="step-pill flex flex-col items-center p-1.5 rounded-lg border text-center transition-all bg-slate-50 text-slate-500 border-slate-200">
+            <span class="text-[10px] sm:text-xs uppercase leading-tight font-extrabold flex items-center gap-0.5">
+              2º <i class="fa-solid fa-star text-amber-500 text-[9px]"></i>
+            </span>
+            <span class="text-[9px] sm:text-[11px] truncate w-full font-bold text-ms-navy">70123</span>
+          </div>
+          <!-- Step 3 -->
+          <div id="step-badge-2" class="step-pill flex flex-col items-center p-1.5 rounded-lg border text-center transition-all bg-slate-50 text-slate-500 border-slate-200">
+            <span class="text-[10px] sm:text-xs uppercase leading-tight font-extrabold">3º</span>
+            <span class="text-[9px] sm:text-[11px] truncate w-full font-medium">Senador 1</span>
+          </div>
+          <!-- Step 4 -->
+          <div id="step-badge-3" class="step-pill flex flex-col items-center p-1.5 rounded-lg border text-center transition-all bg-slate-50 text-slate-500 border-slate-200">
+            <span class="text-[10px] sm:text-xs uppercase leading-tight font-extrabold">4º</span>
+            <span class="text-[9px] sm:text-[11px] truncate w-full font-medium">Senador 2</span>
+          </div>
+          <!-- Step 5 -->
+          <div id="step-badge-4" class="step-pill flex flex-col items-center p-1.5 rounded-lg border text-center transition-all bg-slate-50 text-slate-500 border-slate-200">
+            <span class="text-[10px] sm:text-xs uppercase leading-tight font-extrabold">5º</span>
+            <span class="text-[9px] sm:text-[11px] truncate w-full font-medium">Governo</span>
+          </div>
+          <!-- Step 6 -->
+          <div id="step-badge-5" class="step-pill flex flex-col items-center p-1.5 rounded-lg border text-center transition-all bg-slate-50 text-slate-500 border-slate-200">
+            <span class="text-[10px] sm:text-xs uppercase leading-tight font-extrabold">6º</span>
+            <span class="text-[9px] sm:text-[11px] truncate w-full font-medium">Presidente</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTAINER DA URNA ELETRÔNICA -->
+    <div id="urnaContainer" class="w-full flex justify-center no-print">
+      <div class="bg-gradient-to-b from-slate-200 to-slate-300 p-3 sm:p-6 rounded-2xl sm:rounded-3xl shadow-2xl border-4 border-slate-400 w-full max-w-4xl relative">
+        
+        <!-- CABEÇALHO DA CARCAÇA DA URNA -->
+        <div class="flex items-center justify-between pb-3 sm:pb-4 mb-3 sm:mb-4 border-b border-slate-300 text-slate-700">
+          <div class="flex items-center gap-2">
+            <!-- Brasão da República estilizado -->
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-ms-navy flex items-center justify-center text-ms-gold text-xs sm:text-sm font-bold shadow-inner">
+              <i class="fa-solid fa-landmark"></i>
+            </div>
+            <div>
+              <div class="text-[10px] sm:text-xs font-black tracking-widest text-slate-600 uppercase">JUSTIÇA ELEITORAL</div>
+              <div class="text-xs sm:text-sm font-extrabold text-ms-navy">SIMULADOR OFICIAL — MS 2026</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <button id="soundToggleBtn" onclick="toggleAudio()" class="px-2.5 py-1 bg-white/70 hover:bg-white rounded-md border border-slate-300 text-slate-700 font-medium flex items-center gap-1.5 transition-all text-xs" title="Ligar/Desligar Áudio">
+              <i id="soundIcon" class="fa-solid fa-volume-high text-ms-green"></i>
+              <span class="hidden sm:inline">Som Ativo</span>
+            </button>
+            <span class="hidden md:inline-block px-2 py-0.5 bg-slate-300/80 rounded text-[11px] font-mono text-slate-700">UE-2026-MS</span>
+          </div>
+        </div>
+
+        <!-- CORPO DA URNA: TELA LCD + TECLADO -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-stretch">
+          
+          <!-- VISOR LCD DA URNA (COL 7) -->
+          <div class="lg:col-span-7 flex flex-col">
+            <div id="lcdScreen" class="bg-ms-screen rounded-xl border-4 border-slate-700 shadow-inner p-3 sm:p-5 flex-1 flex flex-col justify-between min-h-[360px] sm:min-h-[420px] relative overflow-hidden font-sans text-slate-900 select-none">
+              
+              <!-- TELA DE GRAVANDO / FIM -->
+              <div id="screenFimOverlay" class="absolute inset-0 bg-ms-screen flex-col items-center justify-center hidden z-20">
+                <div id="fimGravingText" class="text-xl sm:text-2xl font-bold tracking-widest text-slate-700 animate-pulse mb-2">
+                  GRAVANDO...
+                </div>
+                <div id="fimBigText" class="hidden text-5xl sm:text-7xl font-black text-ms-navy tracking-wider">
+                  FIM
+                </div>
+                <div id="fimSubText" class="hidden text-xs sm:text-sm text-slate-600 mt-3 font-semibold text-center px-4">
+                  Votação concluída com sucesso! Gerando sua colinha oficial...
+                </div>
+              </div>
+
+              <!-- MODAL / BANNER DE TRAVA DO 70123 (DEPUTADO ESTADUAL) -->
+              <div id="lockWarningModal" class="absolute inset-0 bg-ms-navy/95 text-white flex-col items-center justify-center p-5 text-center hidden z-30 transition-all backdrop-blur-xs">
+                <div class="w-14 h-14 rounded-full bg-ms-gold/20 border-2 border-ms-gold flex items-center justify-center text-ms-gold text-2xl mb-3 animate-bounce">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="text-base sm:text-lg font-black text-ms-gold uppercase tracking-wide mb-2">
+                  Atenção Eleitor de MS!
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-100 font-medium leading-relaxed max-w-sm mb-4">
+                  Para prosseguir no treino e emitir sua colinha oficial, confirme o número do nosso Deputado Estadual:
+                  <span class="block text-xl font-extrabold text-ms-gold my-1 tracking-wider">70123</span>
+                  <span class="font-bold text-white">(Vanildo Neves — O Amigo de Sempre)</span>!
+                </p>
+                <div class="flex flex-col sm:flex-row gap-2 w-full max-w-xs">
+                  <button onclick="autoFillVanildo()" class="flex-1 py-2.5 px-3 bg-ms-green hover:bg-ms-greenHover text-white font-bold rounded-lg text-xs shadow-md transition-all flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Digitar 70123 Agora</span>
+                  </button>
+                  <button onclick="dismissLockWarning()" class="py-2.5 px-3 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold rounded-lg text-xs transition-all">
+                    Tentar Novamente
+                  </button>
+                </div>
+              </div>
+
+              <!-- TELA NORMAL DE VOTAÇÃO -->
+              <div id="normalScreenContent" class="flex-1 flex flex-col justify-between">
+                <!-- Topo da tela LCD -->
+                <div>
+                  <div class="text-[11px] sm:text-xs uppercase font-bold text-slate-500 tracking-wider">
+                    SEU VOTO PARA
+                  </div>
+                  <h2 id="cargoTitle" class="text-lg sm:text-2xl font-black text-ms-navy tracking-tight mt-0.5">
+                    DEPUTADO FEDERAL
+                  </h2>
+                </div>
+
+                <!-- Meio: Dígitos e dados do candidato -->
+                <div class="my-3 sm:my-4">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <div class="text-xs font-semibold text-slate-600 mb-1">Número:</div>
+                      <!-- Caixas de Dígitos -->
+                      <div id="digitsContainer" class="flex items-center gap-1.5 sm:gap-2">
+                        <!-- Gerado dinamicamente via JS -->
+                      </div>
+                    </div>
+
+                    <!-- Foto do candidato (quando válido) -->
+                    <div id="candidatePhotoBox" class="w-20 h-24 sm:w-24 sm:h-28 border-2 border-slate-400 bg-white rounded-md shadow-xs flex flex-col items-center justify-center p-1 relative overflow-hidden text-center">
+                      <div id="photoPlaceholder" class="text-slate-400 flex flex-col items-center text-[10px]">
+                        <i class="fa-solid fa-user text-2xl sm:text-3xl mb-1 text-slate-300"></i>
+                        <span>FOTO</span>
+                      </div>
+                      <div id="photoContent" class="hidden w-full h-full flex-col items-center justify-center">
+                        <!-- Imagem/Avatar SVG Injetado -->
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Detalhes do Candidato -->
+                  <div id="candidateInfoBox" class="mt-3 min-h-[70px] border-t border-slate-200 pt-2">
+                    <div id="infoNormal" class="space-y-1">
+                      <div class="flex items-baseline gap-2">
+                        <span class="text-xs font-bold text-slate-500 w-16">Nome:</span>
+                        <span id="candidateName" class="text-xs sm:text-sm font-black text-ms-navy truncate">
+                          --
+                        </span>
+                      </div>
+                      <div class="flex items-baseline gap-2">
+                        <span class="text-xs font-bold text-slate-500 w-16">Partido:</span>
+                        <span id="candidateParty" class="text-xs sm:text-sm font-bold text-slate-700">
+                          --
+                        </span>
+                      </div>
+                      <div id="sloganRow" class="hidden items-baseline gap-2">
+                        <span class="text-xs font-bold text-ms-gold w-16">Slogan:</span>
+                        <span id="candidateSlogan" class="text-xs font-bold text-ms-navy italic">
+                          "O Amigo de Sempre!"
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Mensagem de Voto em Branco -->
+                    <div id="brancoNotice" class="hidden py-4 text-center">
+                      <span class="text-xl sm:text-2xl font-black text-slate-800 tracking-wider">
+                        VOTO EM BRANCO
+                      </span>
+                    </div>
+
+                    <!-- Mensagem de Voto Nulo / Desconhecido -->
+                    <div id="nuloNotice" class="hidden py-2">
+                      <div class="text-sm font-bold text-slate-800">NÚMERO NÃO CADASTRADO</div>
+                      <div class="text-xs font-medium text-slate-500">Voto será considerado VOTO DE LEGENDA / CANDIDATO REGISTRADO.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Rodapé da tela LCD (Instruções da Urna) -->
+                <div class="border-t-2 border-slate-700 pt-2 text-[10px] sm:text-[11px] text-slate-700 leading-tight">
+                  <div class="font-bold mb-0.5">Aperte a tecla:</div>
+                  <div class="flex items-center justify-between gap-1 flex-wrap font-semibold">
+                    <span class="text-ms-green font-bold">
+                      <i class="fa-solid fa-circle-check"></i> VERDE para CONFIRMAR
+                    </span>
+                    <span class="text-ms-gold font-bold">
+                      <i class="fa-solid fa-rotate-left"></i> AMARELO para REINICIAR
+                    </span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Dica rápida de teclado para o usuário -->
+            <div class="mt-2 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+              <i class="fa-solid fa-keyboard text-slate-400"></i>
+              <span>Você pode usar o teclado físico do seu computador ou clicar nos botões abaixo.</span>
+            </div>
+          </div>
+
+          <!-- TECLADO DA URNA ELETRÔNICA (COL 5) -->
+          <div class="lg:col-span-5 flex flex-col justify-between bg-slate-800 p-3 sm:p-5 rounded-xl border-4 border-slate-900 shadow-xl">
+            
+            <!-- Placa Justiça Eleitoral do Teclado -->
+            <div class="text-center pb-2 mb-2 border-b border-slate-700 flex items-center justify-center gap-2 text-slate-300">
+              <i class="fa-solid fa-shield-halved text-ms-gold text-xs"></i>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Teclado Eletrônico</span>
+            </div>
+
+            <!-- Grade Numérica 1-9 e 0 -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-2.5 max-w-[260px] mx-auto w-full mb-3 sm:mb-4">
+              <button onclick="pressDigit('1')" class="urna-key bg-ms-keypad hover:bg-ms-keypadHover text-white font-extrabold text-xl sm:text-2xl h-11 sm:h-12 rounded-lg flex items-center justify-center">1</button>
+              <button onclick="pressDigit('2')" class="urna-key bg-ms-keypad hover:bg-ms-keypadHover text-white font-extrabold text-xl sm:text-2xl h-11 sm:h-12 rounded-lg flex items-center justify-center">2</button>
+              <button onclick="pressDigit('3')" class="urna-key bg-ms-keypad hover:bg-ms-keypadHover text-white font-extrabold text-xl sm:text-2xl h-11 sm:h-12 rounded-lg flex items-center justify-center">3</button>
+
+              <button onclick="pressDigit('4')" class="urna-key bg-ms-keypad hover:bg-ms-keypadHover text-white font-extrabold text-xl sm:text-2xl h-11 sm:h-12 rounded-lg flex items-center justify-center">4</button>
+              <button onclick="pressDigit('5')" class="urna-key bg-ms-keypad hover:bg-ms-keypadHover text-white font-extrabold text-xl sm:text-2xl h-11 sm:h-12 rounded-lg flex items-center justify-center relative">
+                5
+                <span class="absolute bottom-1 w-1 h-1 bg-slate-400 rounded-full"></span>
+              </button>
+              <button onclick="pressDigit('6')" class="urna-key bg-ms-keypad hover:bg-ms-keypadHover text-white font-extrabold text-xl sm:text-2xl h-11 sm:h-12 rounded-lg flex items-center justify-center">6</button>
+
+              <button onclick="pressDigit('7')" class="urna-key bg-ms-keypad hover:bg-ms-keypadHover text-white font-extrabold text-xl sm:text-2xl h-11 sm:h-12 rounded-lg flex items-center justify-center">7</button>
+              <button onclick="pressDigit('8')" class="urna-key bg-ms-keypad hover:bg-ms-keypadHover text-white font-extrabold text-xl sm:text-2xl h-11 sm:h-12 rounded-lg flex items-center justify-center">8</button>
+              <button onclick="pressDigit('9')" class="urna-key bg-ms-keypad hover:bg-ms-keypadHover text-white font-extrabold text-xl sm:text-2xl h-11 sm:h-12 rounded-lg flex items-center justify-center">9</button>
+
+              <div class="col-span-3 flex justify-center">
+                <button onclick="pressDigit('0')" class="urna-key bg-ms-keypad hover:bg-ms-keypadHover text-white font-extrabold text-xl sm:text-2xl h-11 sm:h-12 w-[31%] rounded-lg flex items-center justify-center">0</button>
+              </div>
+            </div>
+
+            <!-- Teclas de Ação: BRANCO, CORRIGE (Amarelo Ouro), CONFIRMA (Verde Pantanal) -->
+            <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-700 items-end">
+              <!-- Tecla BRANCO -->
+              <button onclick="pressBranco()" class="urna-key key-branco bg-white hover:bg-slate-100 text-slate-800 font-extrabold text-[11px] sm:text-xs uppercase h-11 sm:h-12 rounded-lg flex flex-col items-center justify-center p-1 leading-tight tracking-tight border border-slate-300">
+                <span>BRANCO</span>
+              </button>
+
+              <!-- Tecla CORRIGE (Amarelo Ouro MS - SEM LARANJA) -->
+              <button onclick="pressCorrige()" class="urna-key key-corrige bg-ms-gold hover:bg-ms-goldHover text-ms-navy font-black text-[11px] sm:text-xs uppercase h-11 sm:h-12 rounded-lg flex flex-col items-center justify-center p-1 leading-tight tracking-tight">
+                <span>CORRIGE</span>
+              </button>
+
+              <!-- Tecla CONFIRMA (Verde Pantanal MS - Maior e mais alta) -->
+              <button onclick="pressConfirma()" class="urna-key key-confirma bg-ms-green hover:bg-ms-greenHover text-white font-black text-xs sm:text-sm uppercase h-13 sm:h-15 rounded-lg flex flex-col items-center justify-center p-1 leading-tight tracking-wide border border-emerald-600">
+                <span>CONFIRMA</span>
+              </button>
+            </div>
+
+            <!-- Botão de atalho para treinar 70123 -->
+            <div class="mt-3 pt-2 text-center border-t border-slate-700/60">
+              <button onclick="quickTrainVanildo()" class="w-full py-1.5 px-2 bg-ms-gold/20 hover:bg-ms-gold/30 border border-ms-gold/40 text-ms-gold text-xs font-bold rounded-md flex items-center justify-center gap-1.5 transition-colors">
+                <i class="fa-solid fa-star"></i>
+                <span>Atalho: Treinar Vanildo Neves (70123)</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SEÇÃO DO COMPROVANTE DA COLINHA DIGITAL (EMISSÃO E COMPARTILHAMENTO) -->
+    <section id="receiptSection" class="w-full max-w-lg mt-6 hidden transition-all duration-500">
+      
+      <!-- Card do Comprovante Estilo Cupom Térmico -->
+      <div id="printReceiptArea" class="bg-white rounded-2xl shadow-2xl border border-slate-300 p-5 sm:p-7 relative receipt-sawtooth text-slate-900 font-sans">
+        
+        <!-- Cabeçalho do Canhoto -->
+        <div class="text-center pb-4 border-b-2 border-dashed border-slate-300">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-ms-navy text-ms-gold text-xl mb-2 shadow-sm">
+            <i class="fa-solid fa-file-invoice"></i>
+          </div>
+          <h2 class="text-lg sm:text-xl font-black text-ms-navy tracking-tight uppercase">
+            Colinha Eleitoral 2026
+          </h2>
+          <div class="text-xs font-bold text-ms-gold uppercase tracking-wider">
+            Mato Grosso do Sul • 1º Turno (04/10/2026)
+          </div>
+          <div class="text-[11px] text-slate-500 mt-1">
+            Simulador Oficial de Treino e Emissão de Votos
+          </div>
+        </div>
+
+        <!-- Lista dos Votos Computados -->
+        <div class="py-4 space-y-2.5 text-xs sm:text-sm">
+          
+          <!-- Deputado Federal -->
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Deputado Federal</span>
+              <span id="recFedName" class="font-bold text-slate-800 text-xs sm:text-sm">Candidato Escolhido</span>
+            </div>
+            <div id="recFedNum" class="text-base sm:text-lg font-mono font-black text-ms-navy bg-white px-2 py-0.5 rounded border border-slate-300">
+              ----
+            </div>
+          </div>
+
+          <!-- DEPUTADO ESTADUAL (DESTAQUE VANILDO NEVES 70123) -->
+          <div class="p-3 rounded-xl bg-gradient-to-r from-ms-navy to-slate-900 text-white shadow-md border-2 border-ms-gold relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 opacity-15 text-6xl text-ms-gold pointer-events-none">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <div class="flex items-center justify-between relative z-10">
+              <div>
+                <span class="text-[10px] uppercase font-bold text-ms-gold tracking-wider flex items-center gap-1">
+                  <i class="fa-solid fa-star text-ms-gold"></i> Deputado Estadual
+                </span>
+                <span class="font-black text-sm sm:text-base text-white block">
+                  VANILDO NEVES
+                </span>
+                <span class="text-[11px] text-slate-300 font-semibold block">
+                  AVANTE (70) • "O Amigo de Sempre!"
+                </span>
+              </div>
+              <div class="text-xl sm:text-2xl font-mono font-black text-ms-gold bg-black/40 px-3 py-1 rounded-lg border border-ms-gold/50 shadow-inner">
+                70.123
+              </div>
+            </div>
+          </div>
+
+          <!-- Senador 1 -->
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Senador (1º Voto)</span>
+              <span id="recSen1Name" class="font-bold text-slate-800 text-xs sm:text-sm">Candidato Escolhido</span>
+            </div>
+            <div id="recSen1Num" class="text-base sm:text-lg font-mono font-black text-ms-navy bg-white px-2 py-0.5 rounded border border-slate-300">
+              ---
+            </div>
+          </div>
+
+          <!-- Senador 2 -->
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Senador (2º Voto)</span>
+              <span id="recSen2Name" class="font-bold text-slate-800 text-xs sm:text-sm">Candidato Escolhido</span>
+            </div>
+            <div id="recSen2Num" class="text-base sm:text-lg font-mono font-black text-ms-navy bg-white px-2 py-0.5 rounded border border-slate-300">
+              ---
+            </div>
+          </div>
+
+          <!-- Governador -->
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Governador do Estado</span>
+              <span id="recGovName" class="font-bold text-slate-800 text-xs sm:text-sm">Candidato Escolhido</span>
+            </div>
+            <div id="recGovNum" class="text-base sm:text-lg font-mono font-black text-ms-navy bg-white px-2 py-0.5 rounded border border-slate-300">
+              --
+            </div>
+          </div>
+
+          <!-- Presidente -->
+          <div class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">Presidente da República</span>
+              <span id="recPresName" class="font-bold text-slate-800 text-xs sm:text-sm">Candidato Escolhido</span>
+            </div>
+            <div id="recPresNum" class="text-base sm:text-lg font-mono font-black text-ms-navy bg-white px-2 py-0.5 rounded border border-slate-300">
+              --
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RODAPÉ OBRIGATÓRIO DO CANHOTO -->
+        <div class="pt-3 border-t-2 border-dashed border-slate-300 text-center space-y-2">
+          <div class="bg-amber-50 border border-ms-gold/40 rounded-lg p-2.5">
+            <p class="text-xs sm:text-sm font-black text-ms-navy tracking-tight leading-snug">
+              ⭐ TRABALHO, DIÁLOGO E RESPEITO POR MATO GROSSO DO SUL, VOTE 70.123. ⭐
+            </p>
+          </div>
+          
+          <div class="text-[11px] sm:text-xs text-slate-600 font-semibold bg-slate-100 p-2 rounded-md border border-slate-200 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-triangle-exclamation text-ms-gold"></i>
+            <span>No dia 4 de outubro de 2026, leve sua colinha em papel para a cabine de votação!</span>
+          </div>
+          <div class="text-[10px] text-slate-400">
+            (Pela legislação eleitoral do TSE, o uso de celular na cabine de votação é proibido)
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BOTÕES DE AÇÃO (IMPRIMIR, WHATSAPP, NOVO TREINO) -->
+      <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5 no-print">
+        <!-- Imprimir / Salvar PDF -->
+        <button onclick="window.print()" class="py-3 px-4 bg-ms-navy hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-xs sm:text-sm">
+          <i class="fa-solid fa-print text-ms-gold"></i>
+          <span>Imprimir / PDF</span>
+        </button>
+
+        <!-- Compartilhar no WhatsApp -->
+        <button onclick="shareWhatsApp()" class="py-3 px-4 bg-ms-green hover:bg-ms-greenHover text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-xs sm:text-sm">
+          <i class="fa-brands fa-whatsapp text-lg"></i>
+          <span>Enviar WhatsApp</span>
+        </button>
+
+        <!-- Novo Treino -->
+        <button onclick="resetUrna()" class="py-3 px-4 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl shadow transition-all flex items-center justify-center gap-2 text-xs sm:text-sm">
+          <i class="fa-solid fa-rotate text-slate-600"></i>
+          <span>Novo Treino</span>
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- RODAPÉ DA PÁGINA -->
+  <footer class="bg-ms-navy text-slate-300 border-t border-slate-800 py-4 px-4 text-center text-xs no-print mt-auto">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-white">Eleições Gerais 2026 • MS</span>
+        <span>—</span>
+        <span class="text-ms-gold font-bold">Vanildo Neves 70.123</span>
+      </div>
+      <div class="text-slate-400 text-[11px]">
+        Simulador didático para treinamento do eleitorado sul-mato-grossense.
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT VANILLA JAVASCRIPT & WEB AUDIO API -->
+  <script>
+    // --- ESTADO DA APLICAÇÃO ---
+    const STEPS = [
+      { id: 'fed', name: 'DEPUTADO FEDERAL', digits: 4, label: 'Dep. Federal' },
+      { id: 'est', name: 'DEPUTADO ESTADUAL', digits: 5, label: 'Dep. Estadual', isLocked: true, lockedNumber: '70123' },
+      { id: 'sen1', name: 'SENADOR (1º VOTO)', digits: 3, label: 'Senador 1' },
+      { id: 'sen2', name: 'SENADOR (2º VOTO)', digits: 3, label: 'Senador 2' },
+      { id: 'gov', name: 'GOVERNADOR', digits: 2, label: 'Governador' },
+      { id: 'pres', name: 'PRESIDENTE DA REPÚBLICA', digits: 2, label: 'Presidente' }
+    ];
+
+    let currentStepIndex = 0;
+    let currentInput = '';
+    let isBranco = false;
+    let audioEnabled = true;
+    let audioCtx = null;
+
+    // Votos registrados
+    const votes = {
+      fed: { number: '', name: 'Voto não preenchido', party: '' },
+      est: { number: '70123', name: 'VANILDO NEVES', party: 'AVANTE (70)' },
+      sen1: { number: '', name: 'Voto não preenchido', party: '' },
+      sen2: { number: '', name: 'Voto não preenchido', party: '' },
+      gov: { number: '', name: 'Voto não preenchido', party: '' },
+      pres: { number: '', name: 'Voto não preenchido', party: '' }
+    };
+
+    // Dicionário de Partidos por prefixo de 2 dígitos
+    const PARTIDOS = {
+      '70': 'AVANTE',
+      '15': 'MDB',
+      '22': 'PL',
+      '13': 'PT',
+      '45': 'PSDB',
+      '10': 'REPUBLICANOS',
+      '11': 'PP',
+      '55': 'PSD',
+      '44': 'UNIÃO BRASIL',
+      '40': 'PSB',
+      '12': 'PDT',
+      '20': 'PODEMOS',
+      '77': 'SOLIDARIEDADE',
+      '50': 'PSOL',
+      '30': 'NOVO',
+      '23': 'CIDADANIA',
+      '65': 'PCdoB',
+      '18': 'REDE'
+    };
+
+    // SVG de Vanildo Neves (Avatar estilizado de alta definição com pin 70)
+    const VANILDO_AVATAR_SVG = `
+      <svg class="w-full h-full object-cover" viewBox="0 0 120 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="120" height="140" fill="#1B2A4A"/>
+        <!-- Gradiente de fundo -->
+        <circle cx="60" cy="50" r="45" fill="#3A7D44" fill-opacity="0.3"/>
+        <!-- Corpo / Terno Azul Escuro -->
+        <path d="M15 140C15 110 32 98 60 98C88 98 105 110 105 140H15Z" fill="#111D35"/>
+        <!-- Camisa Branca -->
+        <path d="M48 98L60 125L72 98H48Z" fill="#FFFFFF"/>
+        <!-- Gravata Dourada MS -->
+        <path d="M57 106L60 135L63 106L60 102L57 106Z" fill="#C9A227"/>
+        <!-- Pin AVANTE 70 na lapela -->
+        <circle cx="38" cy="115" r="7" fill="#C9A227"/>
+        <text x="38" y="118" font-size="7" font-weight="900" fill="#1B2A4A" text-anchor="middle" font-family="sans-serif">70</text>
+        <!-- Pescoço -->
+        <path d="M50 82H70V98H50V82Z" fill="#F0C29E"/>
+        <!-- Rosto -->
+        <ellipse cx="60" cy="62" rx="24" ry="29" fill="#F7D0B2"/>
+        <!-- Cabelo grisalho distinto e alinhado -->
+        <path d="M35 55C35 38 46 32 60 32C74 32 85 38 85 55C85 45 80 37 60 37C40 37 35 45 35 55Z" fill="#5A6578"/>
+        <!-- Cabelo lateral -->
+        <path d="M36 50C34 58 35 68 37 72C35 68 35 56 38 50H36Z" fill="#717D91"/>
+        <path d="M84 50C86 58 85 68 83 72C85 68 85 56 82 50H84Z" fill="#717D91"/>
+        <!-- Olhos amigáveis -->
+        <ellipse cx="51" cy="59" rx="3.5" ry="2.5" fill="#2D3748"/>
+        <ellipse cx="69" cy="59" rx="3.5" ry="2.5" fill="#2D3748"/>
+        <circle cx="52" cy="58" r="1" fill="#FFFFFF"/>
+        <circle cx="70" cy="58" r="1" fill="#FFFFFF"/>
+        <!-- Sobrancelhas -->
+        <path d="M46 54C49 52 54 53 56 55" stroke="#4A5568" stroke-width="2" stroke-linecap="round"/>
+        <path d="M74 54C71 52 66 53 64 55" stroke="#4A5568" stroke-width="2" stroke-linecap="round"/>
+        <!-- Nariz -->
+        <path d="M60 59V69H63" stroke="#DDA884" stroke-width="2" stroke-linecap="round"/>
+        <!-- Sorriso confiante -->
+        <path d="M49 76C54 82 66 82 71 76" stroke="#C25E5E" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M51 76C55 79 65 79 69 76" fill="#FFFFFF"/>
+        <!-- Badge lateral Vanildo -->
+        <rect x="0" y="124" width="120" height="16" fill="#C9A227"/>
+        <text x="60" y="135" font-size="9" font-weight="900" fill="#1B2A4A" text-anchor="middle" font-family="sans-serif">VANILDO NEVES</text>
+      </svg>
+    `;
+
+    // --- WEB AUDIO API (Sons Fiéis da Urna Eletrônica) ---
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const soundIcon = document.getElementById('soundIcon');
+      const soundToggleBtn = document.getElementById('soundToggleBtn');
+      if (audioEnabled) {
+        soundIcon.className = 'fa-solid fa-volume-high text-ms-green';
+        soundToggleBtn.classList.remove('opacity-60');
+      } else {
+        soundIcon.className = 'fa-solid fa-volume-xmark text-slate-400';
+        soundToggleBtn.classList.add('opacity-60');
+      }
+    }
+
+    // Bip clássico de digitação de teclas
+    function playKeyBeep() {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1050, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Bip de confirmação entre etapas normais
+    function playConfirmBeep() {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.setValueAtTime(1200, now + 0.08);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(now + 0.22);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Bip de alerta / trava acionada
+    function playAlertBeep() {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(260, now);
+        osc.frequency.setValueAtTime(220, now + 0.12);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(now + 0.35);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Som clássico de FIM da Urna do TSE ("pililililim")
+    function playFimSound() {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const now = audioCtx.currentTime;
+        
+        // Sequência melódica característica da urna eletrônica
+        const notes = [
+          { freq: 440, duration: 0.12 },
+          { freq: 554, duration: 0.12 },
+          { freq: 659, duration: 0.12 },
+          { freq: 880, duration: 1.2 }
+        ];
+
+        let offset = 0;
+        notes.forEach((n, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(n.freq, now + offset);
+          
+          gain.gain.setValueAtTime(0.3, now + offset);
+          if (idx === notes.length - 1) {
+            gain.gain.setValueAtTime(0.3, now + offset + 0.8);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + offset + n.duration);
+          } else {
+            gain.gain.exponentialRampToValueAtTime(0.01, now + offset + n.duration);
+          }
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + offset);
+          osc.stop(now + offset + n.duration);
+          offset += n.duration;
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // --- RENDERIZAÇÃO DA TELA DA URNA ---
+    function renderStep() {
+      const step = STEPS[currentStepIndex];
+      document.getElementById('cargoTitle').textContent = step.name;
+      document.getElementById('stepCounter').textContent = `Etapa ${currentStepIndex + 1} de ${STEPS.length}`;
+
+      // Atualiza visualizador de etapas (pills)
+      STEPS.forEach((s, idx) => {
+        const badge = document.getElementById(`step-badge-${idx}`);
+        if (!badge) return;
+        if (idx === currentStepIndex) {
+          badge.className = 'step-pill flex flex-col items-center p-1.5 rounded-lg border text-center transition-all bg-ms-navy text-white border-ms-navy font-bold shadow-md scale-102 ring-2 ring-ms-gold';
+        } else if (idx < currentStepIndex) {
+          badge.className = 'step-pill flex flex-col items-center p-1.5 rounded-lg border text-center transition-all bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold';
+        } else {
+          badge.className = 'step-pill flex flex-col items-center p-1.5 rounded-lg border text-center transition-all bg-slate-50 text-slate-500 border-slate-200';
+        }
+      });
+
+      // Monta as caixas de dígitos
+      const digitsContainer = document.getElementById('digitsContainer');
+      digitsContainer.innerHTML = '';
+
+      if (isBranco) {
+        document.getElementById('brancoNotice').classList.remove('hidden');
+        document.getElementById('infoNormal').classList.add('hidden');
+        document.getElementById('nuloNotice').classList.add('hidden');
+        document.getElementById('candidatePhotoBox').classList.add('opacity-30');
+      } else {
+        document.getElementById('brancoNotice').classList.add('hidden');
+        document.getElementById('infoNormal').classList.remove('hidden');
+        document.getElementById('candidatePhotoBox').classList.remove('opacity-30');
+
+        for (let i = 0; i < step.digits; i++) {
+          const char = currentInput[i] || '';
+          const isCurrentActive = (i === currentInput.length);
+          const box = document.createElement('div');
+          
+          box.className = `w-8 h-10 sm:w-10 sm:h-12 border-2 rounded flex items-center justify-center font-mono text-xl sm:text-2xl font-black bg-white shadow-xs ${
+            char ? 'border-slate-800 text-ms-navy' : isCurrentActive ? 'border-ms-navy ring-2 ring-ms-navy/30' : 'border-slate-300 text-slate-300'
+          }`;
+
+          if (char) {
+            box.textContent = char;
+          } else if (isCurrentActive) {
+            const cursor = document.createElement('span');
+            cursor.className = 'w-0.5 h-6 bg-ms-navy cursor-blink';
+            box.appendChild(cursor);
+          }
+          digitsContainer.appendChild(box);
+        }
+      }
+
+      // Detalhes do candidato
+      updateCandidateInfo();
+    }
+
+    function updateCandidateInfo() {
+      const step = STEPS[currentStepIndex];
+      const nameElem = document.getElementById('candidateName');
+      const partyElem = document.getElementById('candidateParty');
+      const sloganRow = document.getElementById('sloganRow');
+      const photoPlaceholder = document.getElementById('photoPlaceholder');
+      const photoContent = document.getElementById('photoContent');
+      const nuloNotice = document.getElementById('nuloNotice');
+
+      if (isBranco) {
+        nameElem.textContent = '--';
+        partyElem.textContent = '--';
+        sloganRow.classList.add('hidden');
+        photoPlaceholder.classList.remove('hidden');
+        photoContent.classList.add('hidden');
+        nuloNotice.classList.add('hidden');
+        return;
+      }
+
+      // Verifica se completou os dígitos do cargo
+      if (currentInput.length === step.digits) {
+        // Caso DEPUTADO ESTADUAL com 70123: VANILDO NEVES
+        if (step.id === 'est' && currentInput === '70123') {
+          nameElem.textContent = 'VANILDO NEVES';
+          partyElem.textContent = 'AVANTE (70)';
+          sloganRow.classList.remove('hidden');
+          document.getElementById('candidateSlogan').textContent = '"O Amigo de Sempre! Servindo a nossa gente."';
+          photoPlaceholder.classList.add('hidden');
+          photoContent.classList.remove('hidden');
+          photoContent.innerHTML = VANILDO_AVATAR_SVG;
+          nuloNotice.classList.add('hidden');
+          return;
+        }
+
+        // Se for outro número no cargo estadual (será travado ao tentar confirmar)
+        if (step.id === 'est') {
+          const prefix = currentInput.substring(0, 2);
+          const pName = PARTIDOS[prefix] || 'PARTIDO NÃO IDENTIFICADO';
+          nameElem.textContent = `CANDIDATO(A) Nº ${currentInput}`;
+          partyElem.textContent = `${pName} (${prefix})`;
+          sloganRow.classList.add('hidden');
+          photoPlaceholder.classList.remove('hidden');
+          photoContent.classList.add('hidden');
+          nuloNotice.classList.remove('hidden');
+          return;
+        }
+
+        // Para os outros cargos (Federal, Senadores, Gov, Pres)
+        const prefix = currentInput.substring(0, 2);
+        const pName = PARTIDOS[prefix] || 'PARTIDO REGISTRADO';
+        
+        let customName = `Candidato(a) ${currentInput}`;
+        if (step.id === 'fed') customName = `Deputado(a) Federal ${currentInput}`;
+        if (step.id === 'sen1') customName = `Candidato(a) ao Senado ${currentInput}`;
+        if (step.id === 'sen2') customName = `Candidato(a) ao Senado ${currentInput}`;
+        if (step.id === 'gov') customName = `Candidato(a) a Governador ${currentInput}`;
+        if (step.id === 'pres') customName = `Candidato(a) a Presidente ${currentInput}`;
+
+        nameElem.textContent = customName;
+        partyElem.textContent = `${pName} (${prefix})`;
+        sloganRow.classList.add('hidden');
+        photoPlaceholder.classList.remove('hidden');
+        photoContent.classList.add('hidden');
+        nuloNotice.classList.add('hidden');
+      } else {
+        nameElem.textContent = '--';
+        partyElem.textContent = '--';
+        sloganRow.classList.add('hidden');
+        photoPlaceholder.classList.remove('hidden');
+        photoContent.classList.add('hidden');
+        nuloNotice.classList.add('hidden');
+      }
+    }
+
+    // --- AÇÕES DO TECLADO ---
+    function pressDigit(digit) {
+      const step = STEPS[currentStepIndex];
+      playKeyBeep();
+      if (isBranco) {
+        isBranco = false;
+        currentInput = '';
+      }
+      if (currentInput.length < step.digits) {
+        currentInput += digit;
+        renderStep();
+      }
+    }
+
+    function pressBranco() {
+      playKeyBeep();
+      const step = STEPS[currentStepIndex];
+
+      // TRAVA CRÍTICA: Deputado Estadual NÃO pode votar em branco!
+      if (step.id === 'est') {
+        triggerLockWarning();
+        return;
+      }
+
+      currentInput = '';
+      isBranco = true;
+      renderStep();
+    }
+
+    function pressCorrige() {
+      playKeyBeep();
+      currentInput = '';
+      isBranco = false;
+      renderStep();
+    }
+
+    // TRAVA OBRIGATÓRIA - DEPUTADO ESTADUAL (70123)
+    function triggerLockWarning() {
+      playAlertBeep();
+      document.getElementById('lockWarningModal').classList.remove('hidden');
+      document.getElementById('lockWarningModal').classList.add('flex');
+      currentInput = '';
+      isBranco = false;
+      renderStep();
+    }
+
+    function dismissLockWarning() {
+      document.getElementById('lockWarningModal').classList.add('hidden');
+      document.getElementById('lockWarningModal').classList.remove('flex');
+      currentInput = '';
+      isBranco = false;
+      renderStep();
+    }
+
+    function autoFillVanildo() {
+      dismissLockWarning();
+      currentInput = '70123';
+      isBranco = false;
+      playConfirmBeep();
+      renderStep();
+    }
+
+    function quickTrainVanildo() {
+      // Pula direto para o cargo estadual com Vanildo Neves selecionado para treino instantâneo
+      currentStepIndex = 1;
+      currentInput = '70123';
+      isBranco = false;
+      playConfirmBeep();
+      renderStep();
+    }
+
+    function pressConfirma() {
+      const step = STEPS[currentStepIndex];
+
+      // 1. REGRA CRÍTICA DE VALIDAÇÃO (DEPUTADO ESTADUAL)
+      if (step.id === 'est') {
+        if (isBranco || currentInput !== '70123') {
+          triggerLockWarning();
+          return;
+        }
+      }
+
+      // Validação de dígitos suficientes
+      if (!isBranco && currentInput.length < step.digits) {
+        playAlertBeep();
+        alert(`Por favor, digite todos os ${step.digits} dígitos para ${step.name} ou aperte BRANCO.`);
+        return;
+      }
+
+      // Validação de Senador 2 (não repetir Senador 1)
+      if (step.id === 'sen2' && !isBranco) {
+        if (votes.sen1.number && votes.sen1.number === currentInput) {
+          playAlertBeep();
+          alert('Atenção: Você não pode votar no mesmo candidato para o 1º e 2º voto de Senador! Escolha outro número ou vote em Branco.');
+          currentInput = '';
+          renderStep();
+          return;
+        }
+      }
+
+      // Registra voto do cargo atual
+      if (isBranco) {
+        votes[step.id] = { number: 'BRANCO', name: 'VOTO EM BRANCO', party: '--' };
+      } else {
+        const prefix = currentInput.substring(0, 2);
+        const pName = PARTIDOS[prefix] || 'PARTIDO REGISTRADO';
+        
+        if (step.id === 'est' && currentInput === '70123') {
+          votes.est = { number: '70123', name: 'VANILDO NEVES', party: 'AVANTE (70)' };
+        } else {
+          votes[step.id] = {
+            number: currentInput,
+            name: `${step.label} ${currentInput}`,
+            party: `${pName} (${prefix})`
+          };
+        }
+      }
+
+      // Verifica se é a última etapa (Presidente)
+      if (currentStepIndex === STEPS.length - 1) {
+        finalizarVotacao();
+      } else {
+        playConfirmBeep();
+        currentStepIndex++;
+        currentInput = '';
+        isBranco = false;
+        renderStep();
+      }
+    }
+
+    // FINALIZAÇÃO DA VOTAÇÃO E EXIBIÇÃO DO CANHOTO
+    function finalizarVotacao() {
+      const overlay = document.getElementById('screenFimOverlay');
+      const gravando = document.getElementById('fimGravingText');
+      const bigFim = document.getElementById('fimBigText');
+      const subFim = document.getElementById('fimSubText');
+
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      gravando.classList.remove('hidden');
+      bigFim.classList.add('hidden');
+      subFim.classList.add('hidden');
+
+      // Toca o som do TSE
+      playFimSound();
+
+      setTimeout(() => {
+        gravando.classList.add('hidden');
+        bigFim.classList.remove('hidden');
+        subFim.classList.remove('hidden');
+      }, 1000);
+
+      setTimeout(() => {
+        // Exibe o canhoto da colinha digital
+        buildReceipt();
+        const receiptSection = document.getElementById('receiptSection');
+        receiptSection.classList.remove('hidden');
+        receiptSection.scrollIntoView({ behavior: 'smooth' });
+      }, 2400);
+    }
+
+    // Preenche os dados do canhoto
+    function buildReceipt() {
+      // Deputado Federal
+      document.getElementById('recFedNum').textContent = votes.fed.number || 'BRANCO';
+      document.getElementById('recFedName').textContent = votes.fed.number === 'BRANCO' ? 'VOTO EM BRANCO' : votes.fed.name;
+
+      // Senador 1
+      document.getElementById('recSen1Num').textContent = votes.sen1.number || 'BRANCO';
+      document.getElementById('recSen1Name').textContent = votes.sen1.number === 'BRANCO' ? 'VOTO EM BRANCO' : votes.sen1.name;
+
+      // Senador 2
+      document.getElementById('recSen2Num').textContent = votes.sen2.number || 'BRANCO';
+      document.getElementById('recSen2Name').textContent = votes.sen2.number === 'BRANCO' ? 'VOTO EM BRANCO' : votes.sen2.name;
+
+      // Governador
+      document.getElementById('recGovNum').textContent = votes.gov.number || 'BRANCO';
+      document.getElementById('recGovName').textContent = votes.gov.number === 'BRANCO' ? 'VOTO EM BRANCO' : votes.gov.name;
+
+      // Presidente
+      document.getElementById('recPresNum').textContent = votes.pres.number || 'BRANCO';
+      document.getElementById('recPresName').textContent = votes.pres.number === 'BRANCO' ? 'VOTO EM BRANCO' : votes.pres.name;
+    }
+
+    // Compartilhamento via WhatsApp
+    function shareWhatsApp() {
+      const msg = 
+`🗳️ *MINHA COLINHA DIGITAL — ELEIÇÕES 2026 (MS)* 🗳️
+Confira meus votos para as eleições de 04 de outubro de 2026 em Mato Grosso do Sul:
+
+🔹 *Deputado Federal:* ${votes.fed.number}
+⭐ *DEPUTADO ESTADUAL: 70.123 — VANILDO NEVES (AVANTE)* ⭐
+   _"O Amigo de Sempre! Servindo a nossa gente."_
+🔹 *Senador (1º Voto):* ${votes.sen1.number}
+🔹 *Senador (2º Voto):* ${votes.sen2.number}
+🔹 *Governador:* ${votes.gov.number}
+🔹 *Presidente:* ${votes.pres.number}
+
+⭐ *TRABALHO, DIÁLOGO E RESPEITO POR MATO GROSSO DO SUL, VOTE 70.123.* ⭐
+
+⚠️ _Lembrete: Leve sua colinha em papel para a cabine de votação!_
+Treine você também no Simulador da Urna Eletrônica!`;
+
+      const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
+    }
+
+    // Reinicia a Urna para novo treino
+    function resetUrna() {
+      currentStepIndex = 0;
+      currentInput = '';
+      isBranco = false;
+      
+      document.getElementById('screenFimOverlay').classList.add('hidden');
+      document.getElementById('screenFimOverlay').classList.remove('flex');
+      document.getElementById('receiptSection').classList.add('hidden');
+      
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      renderStep();
+    }
+
+    // Suporte ao teclado físico do computador
+    window.addEventListener('keydown', (e) => {
+      // Ignora se estiver focado em campos de texto futuros
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+      if (e.key >= '0' && e.key <= '9') {
+        pressDigit(e.key);
+      } else if (e.key === 'Enter') {
+        pressConfirma();
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
+        pressCorrige();
+      } else if (e.key.toLowerCase() === 'b') {
+        pressBranco();
+      }
+    });
+
+    // Inicia na etapa 1 ao carregar
+    document.addEventListener('DOMContentLoaded', () => {
+      renderStep();
+    });
+  </script>
+
+</body>
+</html>

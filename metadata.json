@@ -1,0 +1,6 @@
+{
+  "name": "Colinha Digital Eleições 2026 MS - Vanildo Neves 70123",
+  "description": "Simulador oficial da urna eletrônica para o Mato Grosso do Sul nas Eleições 2026 com emissão de colinha eleitoral digital e treino de voto para Vanildo Neves 70123.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
