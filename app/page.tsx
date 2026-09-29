@@ -17,6 +17,8 @@ import {
   ExternalLink,
   Download
 } from 'lucide-react';
+import { PWAInstallButton } from '@/components/PWAInstallButton';
+import { OfflineIndicator } from '@/components/OfflineIndicator';
 
 interface StepInfo {
   id: 'fed' | 'est' | 'sen1' | 'sen2' | 'gov' | 'pres';
@@ -386,8 +388,8 @@ export default function UrnaPage() {
   // Compartilhamento no WhatsApp
   const handleShareWhatsApp = () => {
     const text = 
-`🗳️ *MINHA COLINHA DIGITAL - ELEIÇÕES 2026 (MS)*
-Simulei meu voto na Urna Oficial! Confira a minha colinha:
+`🗳️ *VOTOFÁCIL - MINHA COLINHA DIGITAL (ELEIÇÕES 2026 MS)*
+Simulei meu voto no VotoFácil da Urna Oficial! Confira a minha colinha:
 
 🔹 *Deputado Federal:* ${recordedVotes.fed.number || 'Confira seu candidato'}
 ⭐ *DEPUTADO ESTADUAL:* *70.123 — VANILDO NEVES (AVANTE)* ⭐
@@ -397,7 +399,7 @@ Simulei meu voto na Urna Oficial! Confira a minha colinha:
 🔹 *Presidente:* ${recordedVotes.pres.number || '--'}
 
 ✨ *"Trabalho, diálogo e respeito por Mato Grosso do Sul, vote 70.123!"*
-👉 Treine você também no Simulador e emita sua colinha: ${typeof window !== 'undefined' ? window.location.href : 'https://vanildoneves70123.com.br'}`;
+👉 Treine você também no VotoFácil e emita sua colinha: ${typeof window !== 'undefined' ? window.location.href : 'https://vanildoneves70123.com.br'}`;
 
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -408,11 +410,22 @@ Simulei meu voto na Urna Oficial! Confira a minha colinha:
     if (typeof window === 'undefined') return;
     const a = document.createElement('a');
     a.href = '/index.html';
-    a.download = 'colinha-eleicoes-2026-vanildo-neves-70123.html';
+    a.download = 'votofacil-colinha-eleicoes-2026.html';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   };
+
+  // Registro do Service Worker PWA
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch((err) => {
+          console.log('SW registration error:', err);
+        });
+      });
+    }
+  }, []);
 
   // Listener para Teclado Físico
   useEffect(() => {
@@ -468,18 +481,26 @@ Simulei meu voto na Urna Oficial! Confira a minha colinha:
               <div className="flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold text-[#C9A227] tracking-widest uppercase">
                 <span>Mato Grosso do Sul</span>
                 <span>•</span>
-                <span>Eleições Gerais 2026</span>
+                <span>Eleições 2026</span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white leading-tight">
-                Colinha Digital & Simulador de Votação
-              </h1>
+              <div className="flex items-baseline gap-2 justify-center sm:justify-start">
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+                  VotoFácil
+                </h1>
+                <span className="text-xs sm:text-sm font-bold text-slate-300 hidden md:inline">
+                  | Colinha Digital & Simulador
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/10 border border-white/20 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm">
-            <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-slate-200">Dep. Estadual:</span>
-            <strong className="text-[#C9A227] font-bold tracking-wider text-base">VANILDO NEVES 70123</strong>
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-center">
+            <PWAInstallButton />
+            <div className="flex items-center gap-3 bg-white/10 border border-white/20 px-3.5 py-1.5 rounded-lg text-xs sm:text-sm">
+              <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="text-slate-200">Dep. Estadual:</span>
+              <strong className="text-[#C9A227] font-bold tracking-wider text-base">VANILDO NEVES 70123</strong>
+            </div>
           </div>
         </div>
       </header>
@@ -553,7 +574,7 @@ Simulei meu voto na Urna Oficial! Confira a minha colinha:
                       JUSTIÇA ELEITORAL
                     </div>
                     <div className="text-xs sm:text-sm font-extrabold text-[#1B2A4A]">
-                      SIMULADOR OFICIAL — MS 2026
+                      VOTOFÁCIL — SIMULADOR OFICIAL MS 2026
                     </div>
                   </div>
                 </div>
@@ -862,14 +883,14 @@ Simulei meu voto na Urna Oficial! Confira a minha colinha:
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#1B2A4A] text-[#C9A227] text-xl mb-2 shadow-sm">
                   <Vote className="w-6 h-6" />
                 </div>
-                <h2 className="text-lg sm:text-xl font-black text-[#1B2A4A] tracking-tight uppercase">
-                  Colinha Eleitoral 2026
+                <h2 className="text-xl sm:text-2xl font-black text-[#1B2A4A] tracking-tight uppercase">
+                  VotoFácil • Colinha 2026
                 </h2>
                 <div className="text-xs font-bold text-[#C9A227] uppercase tracking-wider">
                   Mato Grosso do Sul • 1º Turno (04/10/2026)
                 </div>
                 <div className="text-[11px] text-slate-500 mt-1">
-                  Simulador Oficial de Treino e Emissão de Votos
+                  Comprovante Oficial de Treino e Votação
                 </div>
               </div>
 
@@ -978,6 +999,12 @@ Simulei meu voto na Urna Oficial! Confira a minha colinha:
                 <div className="text-[10px] text-slate-400">
                   (Pela legislação eleitoral do TSE, o uso de aparelho celular na cabine de votação é proibido)
                 </div>
+
+                <div className="pt-2 border-t border-slate-200 text-[9px] text-slate-500 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5">
+                  <span>Desenvolvido por: <a href="https://www.uperttech.com.br/" target="_blank" rel="noopener noreferrer" className="font-bold text-[#1B2A4A] underline">UpertTech</a></span>
+                  <span>•</span>
+                  <span>Infraestrutura: <a href="https://webfacilsolucoes.com.br" target="_blank" rel="noopener noreferrer" className="font-bold text-[#1B2A4A] underline">WebFácil Soluções</a></span>
+                </div>
               </div>
 
             </div>
@@ -1018,21 +1045,58 @@ Simulei meu voto na Urna Oficial! Confira a minha colinha:
               </button>
             </div>
 
+            {/* Banner de Instalação PWA no Comprovante */}
+            <div className="mt-3 w-full flex justify-center print:hidden">
+              <PWAInstallButton className="w-full py-2.5 justify-center" />
+            </div>
+
           </section>
         )}
 
       </main>
 
+      {/* Indicador de Status Offline */}
+      <OfflineIndicator />
+
       {/* RODAPÉ DA PÁGINA */}
-      <footer className="bg-[#1B2A4A] text-slate-300 border-t border-slate-800 py-4 px-4 text-center text-xs print:hidden mt-auto">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-white">Eleições Gerais 2026 • Mato Grosso do Sul</span>
-            <span>—</span>
-            <span className="text-[#C9A227] font-bold">Vanildo Neves 70.123</span>
+      <footer className="bg-[#1B2A4A] text-slate-300 border-t border-slate-800 py-6 px-4 text-xs print:hidden mt-auto">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="text-center md:text-left">
+            <div className="flex items-center justify-center md:justify-start gap-2">
+              <span className="font-extrabold text-white text-sm">VotoFácil</span>
+              <span>•</span>
+              <span className="text-slate-300">Eleições Gerais 2026 MS</span>
+              <span>—</span>
+              <span className="text-[#C9A227] font-bold">Vanildo Neves 70.123</span>
+            </div>
+            <div className="text-slate-400 text-[11px] mt-1">
+              Simulador educativo e cívico desenvolvido para treinamento do eleitorado sul-mato-grossense.
+            </div>
           </div>
-          <div className="text-slate-400 text-[11px]">
-            Simulador educativo e cívico desenvolvido para treinamento do eleitorado sul-mato-grossense.
+
+          <div className="text-center md:text-right text-[11px] text-slate-300 flex flex-col sm:flex-row md:flex-col items-center md:items-end gap-1 sm:gap-3 md:gap-1">
+            <div>
+              <span>Desenvolvido por: </span>
+              <a 
+                href="https://www.uperttech.com.br/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-[#C9A227] hover:underline font-bold transition-colors"
+              >
+                UpertTech
+              </a>
+            </div>
+            <div>
+              <span className="text-slate-400">Infraestrutura: </span>
+              <a 
+                href="https://webfacilsolucoes.com.br" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-white hover:underline font-semibold transition-colors"
+              >
+                WebFácil Soluções
+              </a>
+            </div>
           </div>
         </div>
       </footer>

@@ -3,8 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Colinha Digital Eleições 2026 MS — Vanildo Neves 70123</title>
-  <meta name="description" content="Simulador oficial da Urna Eletrônica Eleições 2026 Mato Grosso do Sul. Treine seu voto para Deputado Estadual Vanildo Neves 70123 e emita sua colinha." />
+  <title>VotoFácil — Colinha Digital Eleições 2026 MS (Vanildo Neves 70123)</title>
+  <meta name="description" content="VotoFácil: Simulador oficial da Urna Eletrônica Eleições 2026 Mato Grosso do Sul. Treine seu voto para Deputado Estadual Vanildo Neves 70123 e emita sua colinha." />
+  
+  <!-- PWA Manifest e Ícones -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#1B2A4A" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="VotoFácil" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -158,11 +169,16 @@
           <div class="flex items-center justify-center sm:justify-start gap-2 text-xs font-semibold text-ms-gold tracking-widest uppercase">
             <span>Mato Grosso do Sul</span>
             <span>•</span>
-            <span>Eleições Gerais 2026</span>
+            <span>Eleições 2026</span>
           </div>
-          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white leading-tight">
-            Colinha Digital & Simulador de Votação
-          </h1>
+          <div class="flex items-baseline gap-2 justify-center sm:justify-start">
+            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white leading-tight">
+              VotoFácil
+            </h1>
+            <span class="text-xs sm:text-sm font-bold text-slate-300 hidden md:inline">
+              | Colinha Digital & Simulador
+            </span>
+          </div>
         </div>
       </div>
 
@@ -241,7 +257,7 @@
             </div>
             <div>
               <div class="text-[10px] sm:text-xs font-black tracking-widest text-slate-600 uppercase">JUSTIÇA ELEITORAL</div>
-              <div class="text-xs sm:text-sm font-extrabold text-ms-navy">SIMULADOR OFICIAL — MS 2026</div>
+              <div class="text-xs sm:text-sm font-extrabold text-ms-navy">VOTOFÁCIL — SIMULADOR OFICIAL MS 2026</div>
             </div>
           </div>
           <div class="flex items-center gap-2 text-xs">
@@ -467,14 +483,14 @@
           <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-ms-navy text-ms-gold text-xl mb-2 shadow-sm">
             <i class="fa-solid fa-file-invoice"></i>
           </div>
-          <h2 class="text-lg sm:text-xl font-black text-ms-navy tracking-tight uppercase">
-            Colinha Eleitoral 2026
+          <h2 class="text-xl sm:text-2xl font-black text-ms-navy tracking-tight uppercase">
+            VotoFácil • Colinha 2026
           </h2>
           <div class="text-xs font-bold text-ms-gold uppercase tracking-wider">
             Mato Grosso do Sul • 1º Turno (04/10/2026)
           </div>
           <div class="text-[11px] text-slate-500 mt-1">
-            Simulador Oficial de Treino e Emissão de Votos
+            Comprovante Oficial de Treino e Votação
           </div>
         </div>
 
@@ -576,6 +592,12 @@
           <div class="text-[10px] text-slate-400">
             (Pela legislação eleitoral do TSE, o uso de celular na cabine de votação é proibido)
           </div>
+          
+          <div class="pt-2 border-t border-slate-200 text-[9px] text-slate-500 flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5">
+            <span>Desenvolvido por: <a href="https://www.uperttech.com.br/" target="_blank" rel="noopener noreferrer" class="font-bold text-ms-navy underline">UpertTech</a></span>
+            <span>•</span>
+            <span>Infraestrutura: <a href="https://webfacilsolucoes.com.br" target="_blank" rel="noopener noreferrer" class="font-bold text-ms-navy underline">WebFácil Soluções</a></span>
+          </div>
         </div>
 
       </div>
@@ -606,15 +628,34 @@
   </main>
 
   <!-- RODAPÉ DA PÁGINA -->
-  <footer class="bg-ms-navy text-slate-300 border-t border-slate-800 py-4 px-4 text-center text-xs no-print mt-auto">
-    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-      <div class="flex items-center gap-2">
-        <span class="font-bold text-white">Eleições Gerais 2026 • MS</span>
-        <span>—</span>
-        <span class="text-ms-gold font-bold">Vanildo Neves 70.123</span>
+  <footer class="bg-ms-navy text-slate-300 border-t border-slate-800 py-6 px-4 text-xs no-print mt-auto">
+    <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="text-center md:text-left">
+        <div class="flex items-center justify-center md:justify-start gap-2">
+          <span class="font-extrabold text-white text-sm">VotoFácil</span>
+          <span>•</span>
+          <span class="text-slate-300">Eleições Gerais 2026 MS</span>
+          <span>—</span>
+          <span class="text-ms-gold font-bold">Vanildo Neves 70.123</span>
+        </div>
+        <div class="text-slate-400 text-[11px] mt-1">
+          Simulador didático para treinamento do eleitorado sul-mato-grossense.
+        </div>
       </div>
-      <div class="text-slate-400 text-[11px]">
-        Simulador didático para treinamento do eleitorado sul-mato-grossense.
+
+      <div class="text-center md:text-right text-[11px] text-slate-300 flex flex-col sm:flex-row md:flex-col items-center md:items-end gap-1 sm:gap-3 md:gap-1">
+        <div>
+          <span>Desenvolvido por: </span>
+          <a href="https://www.uperttech.com.br/" target="_blank" rel="noopener noreferrer" class="text-ms-gold hover:underline font-bold transition-colors">
+            UpertTech
+          </a>
+        </div>
+        <div>
+          <span class="text-slate-400">Infraestrutura: </span>
+          <a href="https://webfacilsolucoes.com.br" target="_blank" rel="noopener noreferrer" class="text-white hover:underline font-semibold transition-colors">
+            WebFácil Soluções
+          </a>
+        </div>
       </div>
     </div>
   </footer>
@@ -1165,8 +1206,8 @@
     // Compartilhamento via WhatsApp
     function shareWhatsApp() {
       const msg = 
-`🗳️ *MINHA COLINHA DIGITAL — ELEIÇÕES 2026 (MS)* 🗳️
-Confira meus votos para as eleições de 04 de outubro de 2026 em Mato Grosso do Sul:
+`🗳️ *VOTOFÁCIL — MINHA COLINHA DIGITAL (ELEIÇÕES 2026 MS)* 🗳️
+Confira meus votos treinados no VotoFácil para as eleições de Mato Grosso do Sul:
 
 🔹 *Deputado Federal:* ${votes.fed.number}
 ⭐ *DEPUTADO ESTADUAL: 70.123 — VANILDO NEVES (AVANTE)* ⭐
@@ -1179,7 +1220,7 @@ Confira meus votos para as eleições de 04 de outubro de 2026 em Mato Grosso do
 ⭐ *TRABALHO, DIÁLOGO E RESPEITO POR MATO GROSSO DO SUL, VOTE 70.123.* ⭐
 
 ⚠️ _Lembrete: Leve sua colinha em papel para a cabine de votação!_
-Treine você também no Simulador da Urna Eletrônica!`;
+Treine você também no VotoFácil!`;
 
       const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
       window.open(url, '_blank');
@@ -1219,6 +1260,17 @@ Treine você também no Simulador da Urna Eletrônica!`;
     document.addEventListener('DOMContentLoaded', () => {
       renderStep();
     });
+
+    // Registro do Service Worker PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          console.log('PWA Service Worker registrado com sucesso:', reg.scope);
+        }).catch((err) => {
+          console.log('Falha ao registrar Service Worker:', err);
+        });
+      });
+    }
   </script>
 
 </body>
